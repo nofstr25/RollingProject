@@ -1,0 +1,18 @@
+{
+        "Windows": {
+                "MinDisk": 10,
+                "MaxDisk": 99999999,
+                "MinRam": 200,
+                "MaxRam": 8000,
+                "MinCores": 2,
+                "MaxCores": 12
+        },
+        "Linux": {
+                "MinDisk": 500,
+                "MaxDisk": 9999999,
+                "MinRam": 100,
+                "MaxRam": 8000,
+                "Min Cores": 1,
+                "Cores": 12
+        }
+}

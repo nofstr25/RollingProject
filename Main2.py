@@ -6,6 +6,20 @@ SERVER_MODES = ["CLI", "GUI", "GUI_light"] #Alowed modes to be used
  #Alowed Servers to be used
 # with open("config.json", "r") as config:
 
+def ConfigLoad():
+    with open("config.json", "r") as config:
+       config = json.load(config)
+    print(config)
+    print("-"*20)
+    print(config["Windows"]["MaxRam"])
+    return config
+
+
+def ConfigWrite():
+    config = ConfigLoad():
+    Value = input("What is the new value?") 
+    config["Windows"]["Ram"] = 900
+
 MinDisk = 1000
 MaxDisk = 50000
 MinRam = 200
@@ -46,10 +60,14 @@ def ParseVal():
         exit(1)
     return args
 
-args = ParseVal()
-print(args)
-print(f"The OS is {args.oparetionalSystem}")
-print(f"The Mode is {args.Mode}")
-print(f"The Disk is {args.DiskSpace}")
-print(f"The Ram is {args.Ram}")
-print(f"The Cores is {args.Cores}")
+def Main():
+    # args = ParseVal()
+    # print(args)
+    # print(f"The OS is {args.oparetionalSystem}")
+    # print(f"The Mode is {args.Mode}")
+    # print(f"The Disk is {args.DiskSpace}")
+    # print(f"The Ram is {args.Ram}")
+    # print(f"The Cores is {args.Cores}")
+    ConfigLoad()
+
+Main()
