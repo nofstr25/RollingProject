@@ -15,14 +15,15 @@ def ParsedStart():
     parser.add_argument("-os", "--oparetionalSystem", type=str, required=True)
     parser.add_argument("-d", "--DiskSpace", type=int, required=False, default=10000)
     parser.add_argument("--Cores", type=int, required=False, default=1)
+    parser.add_argument("-m", "--Mode", type=str, required=False, default="CLI")
+    parser.add_argument("--Ram", type=int, required=False, default=400)
 
     args = parser.parse_args()
 
     if args.oparetionalSystem not in VM_LIST: 
         raise(Exception("OS isn't valid"))
 
-    # parser.add_argument("-m", "--Mode", type=str, required=False, default="CLI")
-    # parser.add_argument("--Ram", type=int, required=False, default=4)
+
 
     
     return args
@@ -46,7 +47,7 @@ class Windows(machine):
 
     def ArgsValidate(self, args, config):
     # Need to implemet switch case with win and linux diffrences
-        server_config = config[args.oparetionalSystem]
+        Allowed_Values  = config[args.oparetionalSystem]
         print(f"This Is the server conf: {server_config}\n END OF CONF")
 
         MaxDisk = server_config["MaxDisk"]
@@ -71,19 +72,51 @@ class Windows(machine):
         return properties            
 
 class Linux:
-    def __init__(self, config):
-        self.name = "Linux"
+    def __init__(self, ID):
+        self.ID = ID
+        self.Disk = None
+        self.Ram = None
 
+    def ArgsValidate(self, args, config):
+    # Need to implemet switch case with win and linux diffrences
+        server_config = config[args.oparetionalSystem]
+        print(f"This Is the server conf: {server_config}\n END OF CONF")
+
+        MinRam = server_config["MinRam"]
+        MaxRam = server_config["MaxRam"]
+        MaxDisk = server_config["MaxDisk"]
+        MinDisk = server_config["MinDisk"]
+
+        if args.DiskSpace < MaxDisk and args.DiskSpace > MinDisk:
+            self.Disk = args.DiskSpace
+        else:
+            print(f"disk space must be between {MinDisk} - {MaxDisk}")
+            exit(1)
+        if args.Ram < MaxRam and args.Ram > MinRam:
+            self.Ram = args.Ram
+        else:
+            print(f"Ram must be between {MinRam} - {MaxRam}")
+            exit(1)
+        properties = {
+            "Disk" : self.Disk,
+            "Cores" : self.Ram
+        }    
+        return properties    
+
+    # parser.add_argument("-m", "--Mode", type=str, required=False, default="CLI")
+    # parser.add_argument("--Ram", type=int, required=False, default=4)
 
 def Main():
     config = ConfigLoad()
-    print(f"\n\nconfig is:\n {config}\nSTOP\n")
     args = ParsedStart()
-    print(f"\n\nArgs are:\n {args}\nSTOP\n")
     id = args.ID
-    m1 = Windows(id)
-    m1.ArgsValidate(args, config)
-    print(m1.ID)
+    # m1 = Windows(id)
+    # m1.ArgsValidate(args, config)
+    # print(m1.ID)
+    m2 = Linux(id)
+    m2.ArgsValidate(args, config)
+    print(m2.ID)
+
     # Windows.ParsedStart(parser)
     # ArgsValidate(args, config)
 
