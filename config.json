@@ -1,19 +1,50 @@
 {
-        "Windows": {
-                "MinDisk": 10,
-                "MaxDisk": 99999999,
-                "MinRam": 200,
-                "MaxRam": 160000,
-                "MinCores": 2,
-                "MaxCores": 12
-        },
-        "Linux": {
-                "MinDisk": 10,
-                "MaxDisk": 99999999,
-                "MinRam": 200,
-                "MaxRam": 8000,
-                "MinCores": 1,
-                "MaxCores": 12,
-                "StartMode" : ["CLI, Desktop, DesktopLight"]
-        }
+        "MinDisk": 10,
+        "MaxDisk": 99999999,
+        "MinRam": 200,
+        "MaxRam": 160000,
+        "MinCores": 2,
+        "MaxCores": 12,
+        "OsList" : ["Windows", "LinuxDebian", "IuseArchBTW"]
 }
+
+        // "Windows": {
+        //         "MinDisk": 10,
+        //         "MaxDisk": 99999999,
+        //         "MinRam": 200,
+        //         "MaxRam": 160000,
+        //         "MinCores": 2,
+        //         "MaxCores": 12
+        // },
+        // "Linux": {
+        //         "MinDisk": 10,
+        //         "MaxDisk": 99999999,
+        //         "MinRam": 200,
+        //         "MaxRam": 8000,
+        //         "MinCores": 1,
+        //         "MaxCores": 12,
+        //         "StartMode" : ["CLI, Desktop, DesktopLight"]
+        // // 
+        // {
+        //         "Machine1": {
+        //             "ID": "Machine1",
+        //             "OS": "Windows",
+        //             "Disk": 9000,
+        //             "Ram": 2000,
+        //             "Cores": 3
+        //         },
+        //         "Machine2": {
+        //             "ID": "Machine2",
+        //             "OS": "Linux",
+        //             "Disk": 4000,
+        //             "Ram": 1000,
+        //             "Cores": 1
+        //         },
+        //         "Machine3": {
+        //             "ID": "Machine3",
+        //             "OS": "Linux",
+        //             "Disk": 6000,
+        //             "Ram": 2000,
+        //             "Cores": 4
+        //         }
+        //     }

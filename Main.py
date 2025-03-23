@@ -1,18 +1,76 @@
 import argparse
 import json
+from sys import argv as argv
+CONFIG_PATH = "config.json"
+MACHINES_CONF = "Machines.json"
+QUITVALS = ["q", "Q", "quit", "Quit", "QUIT", "--quit", "--Quit", "--QUIT"]
 
-VM_LIST = ["Windows", "Linux"] 
-MACHINES = {}
-# SERVER_MODES = ["CLI", "GUI", "GUI_light", "Headless",] #Alowed modes to be used
-#Alowed Servers to be used
 
+
+def JsonLoad(file_path):
+    #Used for loading a Json (config.json or machines.json) as a dict (this is why it uses parsed arg)
+    try:
+        with open(file_path, "r") as file:
+            return json.load(file)
+    except(FileNotFoundError):
+        raise(Exception("File was passed, but it doesn't exsist"))
+
+def JsonWrite(machine, file_path):
+    #Pushes a machine dict into machines.json
+    conf = JsonLoad(file_path) 
+    conf[machine["ID"]] = machine     #Sets a key named by the given machine ID, with the machine dict itslef as its value
+    with open(file_path, "w") as file:
+        json.dump(conf, file)
+
+def CreateMachine(IdList, Os, Disk, Cores):
+    NewMachines = {}  # Dictionary to store instances
+    for id in IdList: #Sets each id as an instance with the parsed params.
+        NewMachines[id] = Machine(id, Os, Disk, Cores)
+        instance = NewMachines[id]
+        machine_conf = instance.InstanceToDict() #converts all self.param to a dict
+        JsonWrite(machine_conf, MACHINES_CONF)
+    print(f"Created the new machines: {list(NewMachines.keys())}")
+
+def MachineUpdate(ids):
+    Allmachines = JsonLoad(MACHINES_CONF)
+    if ids == None:
+        ids = input("What Machine id's do you want to update?").split()
+    Key = input("What Key would you like to update?")
+    Value = input("What is the new value? ")
+    for id in ids:
+        machine = Allmachines[id]
+        machine[Key] = Value
+        JsonWrite[machine, MACHINES_CONF]
+
+def StartMachine():
+    machines = input("What machines would you like to start? (-a for all)")
+    config  = JsonLoad(MACHINES_CONF)
+
+
+    pass
+
+def Welcome():
+    print("Hello! ")
+    while True:
+        Action = input("What action would you like to perform next?\nfor help use --help").lower()
+        if Action == "--startmachine" or Action == "--start":
+            StartMachine()
+        elif Action == "--createmachine" or Action == "--create":
+            CreateMachine()
+        elif Action in QUITVALS:
+            print("Good By")
+            exit(0)
+        else: 
+            print("Invalid action, please try again")
+            continue
 
 def ParsedStart():
 
     parser = argparse.ArgumentParser(description="Qucikly create a VM")
-
-    parser.add_argument("--ID", type=str, required=True)
-    parser.add_argument("-os", "--oparetionalSystem", type=str, required=True)
+    parser.add_argument("--Create", type=str, required=False)
+    parser.add_argument("--Start", type=str, required=False)
+    parser.add_argument("--ID", type=str, required=False)
+    parser.add_argument("-os", "--oparetionalSystem", type=str, required=False)
     parser.add_argument("-d", "--DiskSpace", type=int, required=False, default=10000)
     parser.add_argument("--Cores", type=int, required=False, default=1)
     parser.add_argument("-m", "--Mode", type=str, required=False, default="CLI")
@@ -23,69 +81,39 @@ def ParsedStart():
     if args.oparetionalSystem not in VM_LIST: 
         raise(Exception("OS isn't valid"))
 
-
-
     
     return args
 
-def ConfigLoad():
-    with open("config.json", "r") as config:
-       config = json.load(config)
 
-    # print(config["Windows"]["MaxRam"])
-    return config
 
-class machine:
-    def __init__(self, ID, Disk, Cores):
+# def MachinesLoad(id=None):
+#     Machines = JsonLoad(MACHINES_CONF)
+#     if id == None:
+#         for i in Machines:
+#             with open("Machines.json", "r") as Machines:
+#                 Machines = json.load(Machines)
+#                 return Machines
+
+
+
+class Machine:
+    def __init__(self, ID, OS, Disk, Cores):
         self.ID = ID
+        self.OS = OS
         self.Disk = Disk
         self.Cores = Cores
 
-class Windows(machine):
-    def __init__(self, ID):
-        self.ID = ID
+    def InstanceToDict(self):
+        return {"ID" : self.ID, "OS": self.OS, "Disk": self.Disk, "Cores": self.Cores}
 
     def ArgsValidate(self, args, config):
     # Need to implemet switch case with win and linux diffrences
         Allowed_Values  = config[args.oparetionalSystem]
-        print(f"This Is the server conf: {server_config}\n END OF CONF")
 
-        MaxDisk = server_config["MaxDisk"]
-        MinDisk = server_config["MinDisk"]
-        MaxCores = server_config["MaxCores"]
-        MinCores = server_config["MinCores"]
-
-        if args.DiskSpace < MaxDisk and args.DiskSpace > MinDisk:
-            Disk = args.DiskSpace
-        else:
-            print(f"disk space must be between {MinDisk} - {MaxDisk}")
-            exit(1)
-        if args.Cores < MaxCores and args.Cores > MinCores:
-            Cores = args.Cores
-        else:
-            print(f"Cores must be between {MinCores} - {MaxCores}")
-            exit(1)
-        properties = {
-            "Disk" : Disk,
-            "Cores" : Cores
-        }    
-        return properties            
-
-class Linux:
-    def __init__(self, ID):
-        self.ID = ID
-        self.Disk = None
-        self.Ram = None
-
-    def ArgsValidate(self, args, config):
-    # Need to implemet switch case with win and linux diffrences
-        server_config = config[args.oparetionalSystem]
-        print(f"This Is the server conf: {server_config}\n END OF CONF")
-
-        MinRam = server_config["MinRam"]
-        MaxRam = server_config["MaxRam"]
-        MaxDisk = server_config["MaxDisk"]
-        MinDisk = server_config["MinDisk"]
+        MinRam = Allowed_Values ["MinRam"]
+        MaxRam = Allowed_Values ["MaxRam"]
+        MaxDisk = Allowed_Values ["MaxDisk"]
+        MinDisk = Allowed_Values ["MinDisk"]
 
         if args.DiskSpace < MaxDisk and args.DiskSpace > MinDisk:
             self.Disk = args.DiskSpace
@@ -103,19 +131,29 @@ class Linux:
         }    
         return properties    
 
-    # parser.add_argument("-m", "--Mode", type=str, required=False, default="CLI")
-    # parser.add_argument("--Ram", type=int, required=False, default=4)
+
+    
+    # return NewMachines
+    
 
 def Main():
-    config = ConfigLoad()
-    args = ParsedStart()
-    id = args.ID
-    # m1 = Windows(id)
-    # m1.ArgsValidate(args, config)
-    # print(m1.ID)
-    m2 = Linux(id)
-    m2.ArgsValidate(args, config)
-    print(m2.ID)
+    # config = JsonLoad(CONFIG_PATH)
+    if argv > 1: 
+        args = ParsedStart()
+        Machine.ArgsValidate(args)
+    # id = args.ID
+    # # m1 = Windows(id)
+    # # m1.ArgsValidate(args, config)
+    # # print(m1.ID)``
+    # m2 = Linux(id)
+    # m2.ArgsValidate(args, config)
+    # print(m2.ID)
+    IdList = input("ID?").split()
+    Os = "windows"
+    Disk = 900
+    Cores = 3
+    CreateMachine(IdList, Os, Disk, Cores)
+
 
     # Windows.ParsedStart(parser)
     # ArgsValidate(args, config)
