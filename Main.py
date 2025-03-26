@@ -1,4 +1,3 @@
-import argparse
 import json
 from sys import argv as argv
 CONFIG_PATH = "config.json"
@@ -8,7 +7,7 @@ QUITVALS = ["q", "Q", "quit", "Quit", "QUIT", "--quit", "--Quit", "--QUIT"]
 
 
 def JsonLoad(file_path):
-    #Used for loading a Json (config.json or machines.json) as a dict (this is why it uses parsed arg)
+    #Used for loading a Json (config.json or machines.json) as a dict (this is why it use passed arg)
     try:
         with open(file_path, "r") as file:
             return json.load(file)
@@ -22,9 +21,22 @@ def JsonWrite(machine, file_path):
     with open(file_path, "w") as file:
         json.dump(conf, file)
 
-def CreateMachine(IdList, Os, Disk, Cores):
+def GetParams():
+    machines = JsonLoad(MACHINES_CONF)
+    while True:
+        ids = input("What Machine id's do you want to create?").split()
+        for id in ids:
+            
+            if id in machines:
+                raise(Exception("The given id already exsists"))
+                continue
+            else:
+                pass
+    
+
+def CreateMachine(ids, Os, Disk, Cores):    
     NewMachines = {}  # Dictionary to store instances
-    for id in IdList: #Sets each id as an instance with the parsed params.
+    for id in ids: #Sets each id as an instance with the parsed params.
         NewMachines[id] = Machine(id, Os, Disk, Cores)
         instance = NewMachines[id]
         machine_conf = instance.InstanceToDict() #converts all self.param to a dict
@@ -43,11 +55,40 @@ def MachineUpdate(ids):
         JsonWrite[machine, MACHINES_CONF]
 
 def StartMachine():
-    machines = input("What machines would you like to start? (-a for all)")
-    config  = JsonLoad(MACHINES_CONF)
-
-
-    pass
+    ActiveMachines = {}
+    machines  = JsonLoad(MACHINES_CONF)
+    requests = input("What machines would you like to start? (-a for all)").split
+    if "-a" in requests.lower() or "--all" in requests.lower():
+        #Was desided it's safer to check if -a is in the answer and just operate on all to prevent machines named -a or --All.
+        #although possible to handle, unessasery anoing
+        for machine in machines:
+            ActiveMachines[machine["ID"]] = Machine(machine["ID"], machine["Os"], machine["Disk"], machine["Cores"])
+    else:
+        for id in requests: 
+            try:
+                machine = machines[id]
+                ActiveMachines[machine["ID"]] = Machine(machine["ID"], machine["Os"], machine["Disk"], machine["Cores"])
+            except:
+                raise(Exception(f"the machine: {machine} doesn't exsist"))
+            
+#LIST IMPLEMENTATION:
+# def StartMachineL():
+#     MachinesList = []
+#     machines  = JsonLoad(MACHINES_CONF)
+#     requests = input("What machines would you like to start? (-a for all)").split
+#     if "-a" in requests.lower() or "--all" in requests.lower():
+#         #Was desided it's safer to check if -a is in the answer and just operate on all to prevent machines named -a or --All.
+#         #although possible to handle, unessasery anoing
+#         for machine in machines:
+#             instanse =  Machine(machine["ID"], machine["Os"], machine["Disk"], machine["Cores"])
+#             MachinesList.append(instanse)
+#     else:
+#         for id in requests: 
+#             try:
+#                 instanse =  Machine(machine["ID"], machine["Os"], machine["Disk"], machine["Cores"])
+#                 MachinesList.append(instanse)
+#             except:
+#                 raise(Exception(f"the machine: {machine} doesn't exsist"))
 
 def Welcome():
     print("Hello! ")
@@ -64,37 +105,6 @@ def Welcome():
             print("Invalid action, please try again")
             continue
 
-def ParsedStart():
-
-    parser = argparse.ArgumentParser(description="Qucikly create a VM")
-    parser.add_argument("--Create", type=str, required=False)
-    parser.add_argument("--Start", type=str, required=False)
-    parser.add_argument("--ID", type=str, required=False)
-    parser.add_argument("-os", "--oparetionalSystem", type=str, required=False)
-    parser.add_argument("-d", "--DiskSpace", type=int, required=False, default=10000)
-    parser.add_argument("--Cores", type=int, required=False, default=1)
-    parser.add_argument("-m", "--Mode", type=str, required=False, default="CLI")
-    parser.add_argument("--Ram", type=int, required=False, default=400)
-
-    args = parser.parse_args()
-
-    if args.oparetionalSystem not in VM_LIST: 
-        raise(Exception("OS isn't valid"))
-
-    
-    return args
-
-
-
-# def MachinesLoad(id=None):
-#     Machines = JsonLoad(MACHINES_CONF)
-#     if id == None:
-#         for i in Machines:
-#             with open("Machines.json", "r") as Machines:
-#                 Machines = json.load(Machines)
-#                 return Machines
-
-
 
 class Machine:
     def __init__(self, ID, OS, Disk, Cores):
@@ -106,53 +116,15 @@ class Machine:
     def InstanceToDict(self):
         return {"ID" : self.ID, "OS": self.OS, "Disk": self.Disk, "Cores": self.Cores}
 
-    def ArgsValidate(self, args, config):
-    # Need to implemet switch case with win and linux diffrences
-        Allowed_Values  = config[args.oparetionalSystem]
-
-        MinRam = Allowed_Values ["MinRam"]
-        MaxRam = Allowed_Values ["MaxRam"]
-        MaxDisk = Allowed_Values ["MaxDisk"]
-        MinDisk = Allowed_Values ["MinDisk"]
-
-        if args.DiskSpace < MaxDisk and args.DiskSpace > MinDisk:
-            self.Disk = args.DiskSpace
-        else:
-            print(f"disk space must be between {MinDisk} - {MaxDisk}")
-            exit(1)
-        if args.Ram < MaxRam and args.Ram > MinRam:
-            self.Ram = args.Ram
-        else:
-            print(f"Ram must be between {MinRam} - {MaxRam}")
-            exit(1)
-        properties = {
-            "Disk" : self.Disk,
-            "Cores" : self.Ram
-        }    
-        return properties    
-
-
-    
-    # return NewMachines
     
 
 def Main():
     # config = JsonLoad(CONFIG_PATH)
-    if argv > 1: 
-        args = ParsedStart()
-        Machine.ArgsValidate(args)
-    # id = args.ID
-    # # m1 = Windows(id)
-    # # m1.ArgsValidate(args, config)
-    # # print(m1.ID)``
-    # m2 = Linux(id)
-    # m2.ArgsValidate(args, config)
-    # print(m2.ID)
-    IdList = input("ID?").split()
+    ids = input("ID?").split()
     Os = "windows"
     Disk = 900
     Cores = 3
-    CreateMachine(IdList, Os, Disk, Cores)
+    CreateMachine(ids, Os, Disk, Cores)
 
 
     # Windows.ParsedStart(parser)
