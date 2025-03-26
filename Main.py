@@ -5,7 +5,6 @@ MACHINES_CONF = "Machines.json"
 QUITVALS = ["q", "Q", "quit", "Quit", "QUIT", "--quit", "--Quit", "--QUIT"]
 
 
-
 def JsonLoad(file_path):
     #Used for loading a Json (config.json or machines.json) as a dict (this is why it use passed arg)
     try:
@@ -22,17 +21,92 @@ def JsonWrite(machine, file_path):
         json.dump(conf, file)
 
 def GetParams():
-    machines = JsonLoad(MACHINES_CONF)
+    machines = JsonLoad(MACHINES_CONF) #Get all machins for validating the ID
+    config = JsonLoad(CONFIG_PATH) # Load configuration for valid params
+    #Simplify the configured params with short variables
+    MinDisk, MaxDisk = config["MinDisk"], config["MaxDisk"]
+    MinRam, MaxRam = config["MinRam"], config["MaxRam"]
+    MinCores, MaxCores = config["MinCores"], config["MaxCores"]
+    OsList = config["OsList"]
+ 
+    #This section validates all of the params
+
+    #Get And Validate The IDs
     while True:
-        ids = input("What Machine id's do you want to create?").split()
+        ids = input("What Machine id's do you want to create?\n").split()
+        if ids[0] in QUITVALS:
+            exit(1)
         for id in ids:
             
             if id in machines:
-                raise(Exception("The given id already exsists"))
+                print(f"The given id {id} already exsists")
                 continue
             else:
                 pass
-    
+        break
+    #Get And Validate Vhe OS
+    while True:
+        Os = input("What operating system do you want to run on the machines?\n")
+        if Os in QUITVALS:
+            exit(1)  
+        elif Os.lower() not in OsList:
+            print(f"Unsupported operating system: {Os}\n")
+            continue
+        else:
+            break
+
+    #Get And Validate The Disk
+    while True:
+        Disk = input("How much disk space would you like to assign?")
+        if Disk in QUITVALS:
+            exit(1)
+        if Disk.isdigit():
+            Disk = int(Disk)
+        else:
+            print("Disk size must be a number")
+            continue
+
+        if MinDisk > Disk or Disk > MaxDisk:
+            print(f"Disk size must be between {MinDisk}-{MaxDisk} bytes")
+            continue
+        else:
+            break
+
+    #Get And Validate The Ram
+    while True:
+        Ram = input("How much Ram space would you like to assign?")
+        if Ram in QUITVALS:
+            exit(1)
+        if Ram.isdigit():
+            Ram = int(Ram)
+        else:
+            print("Ram size must be a number")
+            continue
+
+        if MinRam > Ram or Ram > MaxRam:
+            print(f"Ram size must be between {MinRam}-{MaxRam} bytes")
+            continue
+        else:
+            break
+
+
+
+    #Get And Validate The Cores
+    while True:
+        Cores = input("How much Cores space would you like to assign?")
+        if Cores in QUITVALS:
+            exit(1)
+        if Cores.isdigit():
+            Cores = int(Cores)
+        else:
+            print("Cores size must be a number")
+            continue
+
+        if MinCores > Cores or Cores > MaxCores:
+            print(f"Cores size must be between {MinCores}-{MaxCores} bytes")
+            continue
+        else:
+            break
 
 def CreateMachine(ids, Os, Disk, Cores):    
     NewMachines = {}  # Dictionary to store instances
