@@ -1,18 +1,19 @@
 import json
-import logging
 from machine import Machine
-import jsonschema
-
-CONFIG_PATH = "../configs/config.json"
-MACHINES_CONF = "../configs/instances.json"
-README_PATH = "../README.MD"
-QUITVALS = ["--quit, --Quit", "--QUIT", "-q", "-Q", "--q", "--Q"] #using one of those will quite the progrem
+import logging
+import jsonschema # Full library is required for working with its exceptions 
+CONFIG_PATH = "configs/config.json"
+MACHINES_CONF = "configs/instances.json"
+README_PATH = "README.MD"
+QUITVALS = ["--quit," "--Quit", "--QUIT", "-q", "-Q", "--q", "--Q"] #using one of those will quite the progrem
 HELPVALS = ["--help", "--Help", "--HELP", "-h", "-H", "--h", "--H"] #using one of those will display the README.MD
-# Open the read me file and print it
+
+
+# Opens the read me file and print it
 def ReadMe():
     with open(README_PATH, "r") as file:
         print(file.read())
-    input("Press any key to continue...")
+    input("Press Enter to continue...")
         
 #Used for loading a Json (config.json or machines.json) as a dict (this is why it use passed arg)
 def JsonLoad(file_path):
@@ -67,7 +68,7 @@ def validate_jsons(path):
                     "Ram": {"type": "integer"},
                     "Cores": {"type": "integer"}
                 },
-                "required": ["ID", "OS", "Disk", "Ram" "Cores"]
+                "required": ["ID", "OS", "Disk", "Ram", "Cores"]
                     }
                 },
             }
@@ -75,9 +76,10 @@ def validate_jsons(path):
     Json = JsonLoad(path)
     try:
         jsonschema.validate(instance=Json, schema=schema)
-        print("JSON is valid.")
+        print(f"{path} is valid.")
     except jsonschema.exceptions.ValidationError as err:
-        print("JSON is invalid:", err)
+        print(f"The file {path} isn't in a vlaid json format:\n", err)
+        exit(3)
 
 
 
@@ -87,6 +89,12 @@ def validate_numeric_input(param, min_val, max_val, defaultVal):
     while True:
         value = input(f"please asign the desired {param} (default: {defaultVal})")
         
+        #If the user didn't input anything, the default value will be used
+        if not value: 
+            value = int(defaultVal)
+            print(f"Default value: {value} was choosen")
+            break
+
         #Checks if the value is a quit or help
         if value in QUITVALS:
             exit(1)
@@ -95,38 +103,33 @@ def validate_numeric_input(param, min_val, max_val, defaultVal):
             continue
         
         #Actual data validation
-        #Checks if default
-        if value == "":
-            value = defaultVal
-            break
-        #Checks if number
-        elif value.isdigit():
-            value = int(value)
-        else:
+        elif not value.isdigit():
             print("Input must be a number")
-            continue
-        #Checks if the value is within the allowed range
+            continue  
+        else:
+            value = int(value)
         if value < min_val or value > max_val:
-            print(f"Value must be between {min_val}-{max_val}/n")
+            print(f"Value must be between {min_val}-{max_val}\n")
             continue
-        return value
+    print(f"Value: {value} was choosen")
+    return value
     
 def GetParams():
     machines = JsonLoad(MACHINES_CONF) #Get all machins for validating the ID
     config = JsonLoad(CONFIG_PATH) # Load configuration for valid params
     #Assign configured values to variables
-    DefDisk, MinDisk, MaxDisk = config["DefDisk"], config["MinDisk"], config["MaxDisk"]
-    DefRam, MinRam, MaxRam = config["DefRam"], config["MinRam"], config["MaxRam"]
-    DefCores, MinCores, MaxCores = config["DefCores"], config["MinCores"], config["MaxCores"]
+    DefaultDisk, MinDisk, MaxDisk = config["DefaultDisk"], config["MinDisk"], config["MaxDisk"]
+    DefaultRam, MinRam, MaxRam = config["DefaultRam"], config["MinRam"], config["MaxRam"]
+    DefaultCores, MinCores, MaxCores = config["DefaultCores"], config["MinCores"], config["MaxCores"]
     OsList = config["OsList"]
  
     #This section validates all of the params
 
     #Get And Validate The IDs
     while True:
-        ids = input("Please name all machines you want to create, NOTICE:\n1. Machine id's must be uniqe\n" 
-                    "2. BulkBuilder create \"stacks\" of machines, specified resources will be assign for all given machines\n"
-                    "3. For additional help read README.MD\n").split()
+        ids = input("Please name all machines you want to create\n").split()
+        if not ids:
+            continue
         if ids[0] in QUITVALS:
             exit(1)
         elif ids[0] in HELPVALS:
@@ -136,13 +139,15 @@ def GetParams():
             if id in machines:
                 print(f"The given id {id} already exsists")
                 continue
-            else:
-                pass
         break
+
+    #Setting params for the machines:
+    print("\nNotice:\nThe BulkBuilder \"--createMachine\" command creates multiple machines with the same configuration.\n"
+          "assigend parameters will be used for all mentioned machines:\n\n")
     #Get And Validate Vhe OS
     while True:
-        Os = input("What operating system do you want to run on the machines?\n")
-        if Os.lower in QUITVALS:
+        Os = input("What operating system do you want to asign for  the machines?\n")
+        if Os.lower() in QUITVALS:
             exit(1)  
         elif Os.lower() not in OsList:
             print(f"Unsupported operating system: {Os}\n")
@@ -151,47 +156,52 @@ def GetParams():
             break
 
     #Get And Validate The Disk
-    Disk = validate_numeric_input("Disk", MinDisk, MaxDisk, DefDisk)
+    Disk = validate_numeric_input("Disk", MinDisk, MaxDisk, DefaultDisk)
     #Get And Validate The Ram
-    Ram = validate_numeric_input("Ram", MinRam, MaxRam, DefRam)
+    Ram = validate_numeric_input("Ram", MinRam, MaxRam, DefaultRam)
     #Get And Validate The Cores
-    Cores = validate_numeric_input("Cores", MinCores, MaxCores, DefCores)
+    Cores = validate_numeric_input("Cores", MinCores, MaxCores, DefaultCores)
     return ids, Os, Disk, Ram, Cores
 
-def CreateMachine(ids, Os, Disk, Cores):    
+#Same function as CreateMachine but with logging
+def CreateMachineLog():
+    ids, Os, Disk, Ram, Cores = GetParams()  
     NewMachines = {}  # Dictionary to store instances
     for id in ids: #Sets each id as an instance with the parsed params.
-        NewMachines[id] = Machine(id, Os, Disk, Cores)
+        NewMachines[id] = Machine(id, Os, Disk, Ram, Cores)
+        instance = NewMachines[id]
+        machine_conf = instance.InstanceToDict() #converts all self.param to a dict
+        JsonWrite(machine_conf, MACHINES_CONF)
+        # logging.info(f"Created machine: {id}")
+    print(f"Created the new machines: {list(NewMachines.keys())}")
+
+def CreateMachine():
+    ids, Os, Disk, Ram, Cores = GetParams()  
+    NewMachines = {}  # Dictionary to store instances
+    for id in ids: #Sets each id as an instance with the parsed params.
+        NewMachines[id] = Machine(id, Os, Disk, Ram, Cores)
         instance = NewMachines[id]
         machine_conf = instance.InstanceToDict() #converts all self.param to a dict
         JsonWrite(machine_conf, MACHINES_CONF)
     print(f"Created the new machines: {list(NewMachines.keys())}")
 
-def MachineUpdate(ids):
-    Allmachines = JsonLoad(MACHINES_CONF)
-    if ids == None:
-        ids = input("What Machine id's do you want to update?").split()
-    Key = input("What Key would you like to update?")
-    Value = input("What is the new value? ")
-    for id in ids:
-        machine = Allmachines[id]
-        machine[Key] = Value
-        JsonWrite[machine, MACHINES_CONF]
 
+#Starts desired machines based on their configuration in instances.json
 def StartMachine():
     ActiveMachines = {}
     machines  = JsonLoad(MACHINES_CONF)
-    requests = input("What machines would you like to start? (-a for all)").split
-    if "-a" in requests.lower() or "--all" in requests.lower():
-        #Was desided it's safer to check if -a is in the answer and just operate on all to prevent machines named -a or --All.
-        #although possible to handle, unessasery anoing
-        for machine in machines:
-            ActiveMachines[machine["ID"]] = Machine(machine["ID"], machine["Os"], machine["Disk"], machine["Cores"])
+    requests = input("What machines would you like to start? (-a for all)\n").split()
+    if "-a" in requests or "--all" in requests or "-A" in requests or "--ALL" in requests:
+        #Was desided it's safer to check if -a is IN the answer and not THE answer to prevent machines named -a or --All.
+        for machine in machines.values():
+            ActiveMachines[machine["ID"]] = Machine(machine["ID"], machine["OS"], machine["Disk"], machine["Ram"], machine["Cores"])
+            print(f"Started machine: {machine['ID']}")
+        print(f"All machines are now running: {ActiveMachines.keys()}")
     else:
         for id in requests: 
             try:
                 machine = machines[id]
-                ActiveMachines[machine["ID"]] = Machine(machine["ID"], machine["Os"], machine["Disk"], machine["Cores"])
+                ActiveMachines[machine["ID"]] = Machine(machine["ID"], machine["OS"], machine["Disk"], machine["Ram"], machine["Cores"])
             except KeyError:
                 print(f"The machine: {id} doesn't exist")
             
@@ -201,31 +211,39 @@ def Welcome():
           "At any time for help use --help\n"
           )
     while True:
-        Action = input("What action would you like to perform next?\nfor help use --help").lower()
-        if Action == "--startmachines" or Action == "--start":
-            StartMachine()
-        elif Action == "--createmachine" or Action == "--create":
-            CreateMachine()
-        elif Action in QUITVALS:
+        Action = input("What action would you like to perform next?\n"
+                    "--start or --startmachines for starting machines\n"
+                    "--create or --createmachines for creating machines\n"   
+                    "for help use --help\n").lower().strip()
+
+        if Action in QUITVALS:
             print("Good By")
-            exit(0)
+            exit(1)
+        elif Action in HELPVALS:
+            ReadMe()
+        #Runs saved machines as instances    
+        elif Action == "-s" or Action == "--startmachines" or Action == "--start":
+            StartMachine()
+        elif Action == "-c" or Action == "--createmachine" or Action == "--create":
+            CreateMachine()
         else: 
             print("Invalid action, please try again")
             continue
     
-
 def Main():
+    validate_jsons(CONFIG_PATH)
+    validate_jsons(MACHINES_CONF)
     Welcome()
-    # Windows.ParsedStart(parser)
-    # ArgsValidate(args, config)
-
-
-    # print(args)
-    # print(f"The OS is {args.operationalSystem}")
-    # print(f"The Mode is {args.Mode}")
-    # print(f"The Disk is {args.DiskSpace}")
-    # print(f"The Ram is {args.Ram}")
-    # print(f"The Cores is {args.Cores}")
-
 
 Main()
+
+# def MachineUpdate(ids=None): #Depricated - Didn't have time to finish, isn't a project goal
+#     Allmachines = JsonLoad(MACHINES_CONF)
+#     if ids == None:
+#         ids = input("What Machine id's do you want to update?").split()
+#     Key = input("What Key would you like to update?")
+#     Value = input("What is the new value? ")
+#     for id in ids:
+#         machine = Allmachines[id]
+#         machine[Key] = Value
+#         JsonWrite[machine, MACHINES_CONF]

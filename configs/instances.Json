@@ -20,34 +20,25 @@
         "Ram": 2000,
         "Cores": 4
     },
-    "Mongo": {
-        "ID": "Mongo",
+    "nof": {
+        "ID": "nof",
         "OS": "windows",
-        "Disk": 900,
-        "Cores": 3
+        "Disk": 100,
+        "Ram": 2000,
+        "Cores": 2
     },
-    "Avatar": {
-        "ID": "Avatar",
+    "joe": {
+        "ID": "joe",
         "OS": "windows",
-        "Disk": 900,
-        "Cores": 3
+        "Disk": 100,
+        "Ram": 2000,
+        "Cores": 2
     },
-    "nnn": {
-        "ID": "nnn",
+    "bobb": {
+        "ID": "bobb",
         "OS": "windows",
-        "Disk": 900,
-        "Cores": 3
-    },
-    "hhh": {
-        "ID": "hhh",
-        "OS": "windows",
-        "Disk": 900,
-        "Cores": 3
-    },
-    "avatar": {
-        "ID": "avatar",
-        "OS": "windows",
-        "Disk": 900,
-        "Cores": 3
+        "Disk": 100,
+        "Ram": 2000,
+        "Cores": 2
     }
 }

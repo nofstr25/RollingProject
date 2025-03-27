@@ -8,9 +8,9 @@
         "MinCores": 2,
         "MaxCores": 12,
         "DefaultCores": 2,
-        "OsList": [ //list must be in lowercase
-                "windows", //If you choose windows are gay and you should be ashamed of yourself 
-                "linux", //I USE ARCH BTW
+        "OsList" : [ 
+                "windows",  
+                "linux", 
                 "linuxdebian",
                 "linuxubuntu",
                 "linuxmint",
@@ -21,6 +21,7 @@
                 "ios",
                 "android",
                 "chromeos",
+                "bsd",
                 "freebsd",
                 "netbsd",
                 "openbsd",
@@ -29,6 +30,7 @@
                 "reactos",
                 "amigaos",
                 "aros",
-                "morphos"
+                "morphos",
+                "unix"
               ]
         }
