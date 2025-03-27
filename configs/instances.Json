@@ -1,0 +1,53 @@
+{
+    "Machine1": {
+        "ID": "Machine1",
+        "OS": "Windows",
+        "Disk": 9000,
+        "Ram": 2000,
+        "Cores": 3
+    },
+    "Machine2": {
+        "ID": "Machine2",
+        "OS": "Linux",
+        "Disk": 4000,
+        "Ram": 1000,
+        "Cores": 1
+    },
+    "Machine3": {
+        "ID": "Machine3",
+        "OS": "Linux",
+        "Disk": 6000,
+        "Ram": 2000,
+        "Cores": 4
+    },
+    "Mongo": {
+        "ID": "Mongo",
+        "OS": "windows",
+        "Disk": 900,
+        "Cores": 3
+    },
+    "Avatar": {
+        "ID": "Avatar",
+        "OS": "windows",
+        "Disk": 900,
+        "Cores": 3
+    },
+    "nnn": {
+        "ID": "nnn",
+        "OS": "windows",
+        "Disk": 900,
+        "Cores": 3
+    },
+    "hhh": {
+        "ID": "hhh",
+        "OS": "windows",
+        "Disk": 900,
+        "Cores": 3
+    },
+    "avatar": {
+        "ID": "avatar",
+        "OS": "windows",
+        "Disk": 900,
+        "Cores": 3
+    }
+}

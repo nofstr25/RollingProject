@@ -1,0 +1,34 @@
+{
+        "MinDisk": 10,
+        "MaxDisk": 99999999,
+        "DefaultDisk": 100,
+        "MinRam": 200,
+        "MaxRam": 160000,
+        "DefaultRam": 2000,
+        "MinCores": 2,
+        "MaxCores": 12,
+        "DefaultCores": 2,
+        "OsList": [ //list must be in lowercase
+                "windows", //If you choose windows are gay and you should be ashamed of yourself 
+                "linux", //I USE ARCH BTW
+                "linuxdebian",
+                "linuxubuntu",
+                "linuxmint",
+                "linuxfedora",
+                "linuxcentos",
+                "linuxarch",
+                "macos",
+                "ios",
+                "android",
+                "chromeos",
+                "freebsd",
+                "netbsd",
+                "openbsd",
+                "solaris",
+                "haiku",
+                "reactos",
+                "amigaos",
+                "aros",
+                "morphos"
+              ]
+        }
