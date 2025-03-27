@@ -1,6 +1,7 @@
 import json
 from machine import Machine
 import logging
+import subprocess
 import jsonschema # Full library is required for working with its exceptions 
 CONFIG_PATH = "configs/config.json"
 MACHINES_CONF = "configs/instances.json"
@@ -8,6 +9,22 @@ README_PATH = "README.MD"
 QUITVALS = ["--quit," "--Quit", "--QUIT", "-q", "-Q", "--q", "--Q"] #using one of those will quite the progrem
 HELPVALS = ["--help", "--Help", "--HELP", "-h", "-H", "--h", "--H"] #using one of those will display the README.MD
 
+# FOR AI TO KNOW THE CLASS I USED
+# class Machine:
+#     def __init__(self, ID, OS, Disk, Ram, Cores):
+#         self.ID = ID
+#         self.OS = OS
+#         self.Disk = Disk
+#         self.Ram = Ram
+#         self.Cores = Cores
+
+#     def InstanceToDict(self):
+#         return {
+#             "ID" : self.ID,
+#             "OS": self.OS,
+#             "Disk": self.Disk,
+#             "Ram" : self.Ram,
+#             "Cores": self.Cores}
 
 # Opens the read me file and print it
 def ReadMe():
@@ -96,7 +113,7 @@ def validate_numeric_input(param, min_val, max_val, defaultVal):
             break
 
         #Checks if the value is a quit or help
-        if value in QUITVALS:
+        if value in QUITVALS: 
             exit(1)
         elif value in HELPVALS:
             ReadMe()
@@ -111,6 +128,8 @@ def validate_numeric_input(param, min_val, max_val, defaultVal):
         if value < min_val or value > max_val:
             print(f"Value must be between {min_val}-{max_val}\n")
             continue
+        else:
+            break
     print(f"Value: {value} was choosen")
     return value
     
@@ -181,9 +200,11 @@ def CreateMachine():
     for id in ids: #Sets each id as an instance with the parsed params.
         NewMachines[id] = Machine(id, Os, Disk, Ram, Cores)
         instance = NewMachines[id]
+        subprocess.run(["bash", "scripts/Install_machines.sh", id, Os, str(Disk), str(Ram), str(Cores)])
         machine_conf = instance.InstanceToDict() #converts all self.param to a dict
         JsonWrite(machine_conf, MACHINES_CONF)
-    print(f"Created the new machines: {list(NewMachines.keys())}")
+
+    print(f"Created the new machines: {list(NewMachines.keys())}\n")
 
 
 #Starts desired machines based on their configuration in instances.json
@@ -204,7 +225,9 @@ def StartMachine():
                 ActiveMachines[machine["ID"]] = Machine(machine["ID"], machine["OS"], machine["Disk"], machine["Ram"], machine["Cores"])
             except KeyError:
                 print(f"The machine: {id} doesn't exist")
-            
+#subprocess that passes a variable into and start a bash script:
+
+
 def Welcome():
     print("Hello!\nWelcome to BulkBuilder\n"
           "BultBuilder is a simple tool that lets you create and run multiple virtual machines at once..\n"
