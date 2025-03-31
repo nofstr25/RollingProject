@@ -7,20 +7,34 @@ CONFIG_PATH = "configs/config.json"
 MACHINES_CONF = "configs/instances.json"
 LOG_PATH = "Logs/provisioning.log"
 README_PATH = "README.MD"
-QUITVALS = ["--quit," "--Quit", "--QUIT", "-q", "-Q", "--q", "--Q"] #using one of those will quite the progrem
+QUITVALS = ["--quit" "--Quit", "--QUIT", "-q", "-Q", "--q", "--Q"] #using one of those will quite the progrem
 HELPVALS = ["--help", "--Help", "--HELP", "-h", "-H", "--h", "--H"] #using one of those will display the README.MD
 
-logging.basicConfig(filename=LOG_PATH, level=logging.DEBUG, filemode="a") #Creates a log file for the program
+logging.basicConfig(
+    level=logging.ERROR,
+    filename='LOG_PATH',
+    filemode='a',
+    format='%(levelname)s - %(asctime)s - %(message)s')
+
+#Checks if a log file exists, if not it will create one
+def CheckLog():
+    try:
+        with open(LOG_PATH, "r") as file:
+            pass
+    except FileNotFoundError:
+        with open(LOG_PATH, "w") as file:
+            pass
 
 # Opens the read me file and print it
 def ReadMe():
     try:
         with open(README_PATH, "r") as file:
             print(file.read())
+        logging.debug("The ReadMe file was reqested", exc_info=True)
         input("Press Enter to continue...")
     except(FileNotFoundError):
-        logging.error(f"The file: {README_PATH} doesn't exsist", exc_info=True)
-        print(f"The file: {README_PATH} doesn't exsist")
+        logging.error(f"The file: {README_PATH} doesn't exist", exc_info=True)
+        print(f"The file: {README_PATH} doesn't exist")
         exit(2)
 
 #Used for loading a Json (config.json or machines.json) as a dict (this is why it use passed arg)
@@ -29,8 +43,8 @@ def JsonLoad(file_path):
         with open(file_path, "r") as file:
             return json.load(file)
     except(FileNotFoundError):
-        logging.critical(f"The file: {file_path} doesn't exsist", exc_info=True)
-        print(f"The file: {file_path} doesn't exsist")
+        logging.critical(f"The file: {file_path} doesn't exist", exc_info=True)
+        print(f"The file: {file_path} doesn't exist")
         exit(2)
     
 #Pushes a machine dict into machines.json
@@ -154,9 +168,11 @@ def GetParams():
                 logging.info("User requested help")
                 ReadMe()
                 continue
-            for id in ids:
+
+            store_ids = ids #Stores the ids for safe iteration
+            for id in store_ids: 
                 if id in machines:
-                    print(f"The given id \"{id}\" already exsists and will be skipped")
+                    print(f"The given id \"{id}\" already exists and will be skipped")
                     ids.remove(id)
             if not ids: #If all ids are already in the machines.json Ask for 
                 print("All given IDs are already in use, please try again")
@@ -186,24 +202,27 @@ def GetParams():
         Cores = validate_numeric_input("Cores", MinCores, MaxCores, DefaultCores)
         logging.info(f"Params were validated: {ids, Os, Disk, Ram, Cores}")
         return ids, Os, Disk, Ram, Cores
-    except Exception:
-        logging.error(f"Issue Validating Params: {ids, Os, Disk, Ram, Cores}", exc_info=True)
+    except Exception as err:
+        logging.error(f"Error Validating Params", exc_info=True)
         print("An error occured whilte trying to validate the params, please try again")
-        exit(4)
 
 def CreateMachine():
-    ids, Os, Disk, Ram, Cores = GetParams()  
     NewMachines = {}  # Dictionary to store instances
     FailedMachines = [] # List to store failed machines
+    try: #Handle case where GetParams() fails to return the params
+        ids, Os, Disk, Ram, Cores = GetParams()
+    except TypeError:
+        logging.error("CreateMachine Failed to get the machine parameters", exc_info=True)
+        return
+    
     for id in ids: #Sets each id as an instance with the parsed params.
         try:
             instance = Machine(id, Os, Disk, Ram, Cores)
             NewMachines[id] = instance
             machine_conf = instance.InstanceToDict() #converts all self.param to a dict
             JsonWrite(machine_conf, MACHINES_CONF)
-            logging.debug(f"Created a new machine: {id}")
         except Exception as err:
-            logging.error(f"Failed to save machine configuration: {id} ", exSc_info=True)
+            logging.error(f"Failed to save machine configuration: {id} ", exc_info=True)
             print(f"Failed to write the machine: {id} to the config file")
             FailedMachines.append(id)
         #Installs services on the new machines
@@ -226,8 +245,8 @@ def StartMachine():
     ActiveMachines = {} #Dictionary to store the running machines
     machines  = JsonLoad(MACHINES_CONF)
     if not machines: #Checks if there are any machines to start
-        logging.warning("No machines to start", exc_info=True)
-        print("No machines to start:\n", err)
+        logging.warning("Start Machine were called but there were no machines to start", exc_info=True)
+        print("No machines to start:\n")
         return
     requests = input("What machines would you like to start? (-a for all)\n").split()
     if "-a" in requests or "--all" in requests or "-A" in requests or "--ALL" in requests:    #Was desided it's safer to check if -a is IN the answer and not THE answer to prevent machines named -a or --All.
@@ -247,14 +266,18 @@ def StartMachine():
             except KeyError:
                 logging.error(f"The machine: {id} doesn't exist", exc_info=True)
                 print(f"The machine: {id} doesn't exist")
-    print(f"Activated requsted machines: {ActiveMachines.keys()}")
-    logging.info(f"Activated requsted machines: {ActiveMachines.keys()}")
+    if len(ActiveMachines) == len(requests):
+        print(f"Succesfuly activated the requsted machines\n")
+        logging.info(f"Activated requsted machines: {ActiveMachines.keys()}")
+    else:
+        print(f"The following machines were succesfuly activated: {', '.join(ActiveMachines.keys())}\n")
 def Welcome():
     print("Hello!\nWelcome to BulkBuilder\n"
           "BultBuilder is a simple tool that lets you create and run multiple virtual machines at once..\n"
           "At any time for help use --help\n"
           )
     while True:
+        logging.debug("Main loop was activated")
         Action = input("What action would you like to perform next?\n"
                     "--start or --startmachines for starting machines\n"
                     "--create or --createmachines for creating machines\n"   
@@ -267,7 +290,7 @@ def Welcome():
         elif Action in HELPVALS:
             ReadMe()
         elif Action == "-s" or Action == "--startmachines" or Action == "--start":
-            logging.debug("Start machines was selected")
+            logging.info("Start machines was selected")
             StartMachine()   #Runs saved machines as based on their ID
         elif Action == "-c" or Action == "--createmachine" or Action == "--create":
             logging.debug("Create machines was selected")
@@ -284,6 +307,37 @@ def Main():
     Welcome()
 
 Main()
+
+# for AI to know my Machine class:
+# import logging
+# logging.basicConfig(
+#     level=logging.INFO,
+#     filename='Logs/provisioning.log',
+#     filemode='a',
+#     format='%(levelname)s - %(asctime)s - %(message)s')
+
+
+# class Machine:
+#     def __init__(self, ID, OS, Disk, Ram, Cores):
+#         self.ID = ID
+#         self.OS = OS
+#         self.Disk = Disk
+#         self.Ram = Ram
+#         self.Cores = Cores
+#         self.logger = logging.basicConfig(
+#             level=logging.INFO,
+#             filename='Logs/provisioning.log',
+#             filemode='a',
+#             format='%(levelname)s - %(asctime)s - %(message)s')
+#         logging.info(f"Created a new machine: {self.ID}") #Didnt implement self.logger because there is only a single class.
+
+#     def InstanceToDict(self):
+#         return {
+#             "ID" : self.ID,
+#             "OS": self.OS,
+#             "Disk": self.Disk,
+#             "Ram" : self.Ram,
+#             "Cores": self.Cores}
 
 # def MachineUpdate(ids=None): #Depricated - Didn't have time to finish, isn't a project goal
 #     Allmachines = JsonLoad(MACHINES_CONF)
