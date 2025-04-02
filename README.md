@@ -31,12 +31,13 @@ Ensure the following dependencies are installed on your system:
 Configurations
 -------------
 
-Configuration files are stored inside configs/ directory:
+Configuration files are stored inside configs/ directory
 
 *   **config.json**: Defines default values and constraints for creating new machines.
     
 *   **instances.json**: Stores information about created machines.
 
+Notice: The configuration files DO NOT support comments.
 
 Usage
 -----
@@ -71,7 +72,9 @@ Than prompted to enter the desired machines parameters: (parameters will affect 
 *   **Number of CPU cores** (limitations and default values are configured inside config.json)
     
 
-Once the parameters are validated, machines parameters are stored inside instances.json for later use.
+Once the parameters are validated:
+*   Machines parameters are stored inside instances.json for later use.
+*   Diffult Softwars are installed on the machine using a bash script.
 
 
 ### Starting Machines
