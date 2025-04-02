@@ -1,102 +1,102 @@
 BulkBuilder
+===========
 
-BulkBuilder is a simple tool for creating and managing multiple virtual machines efficiently. It provides an interactive command-line interface to define machine parameters, validate configurations, and launch virtual machines based on predefined JSON configurations.
+BulkBuilder is a simple tool for creating and managing multiple virtual machines efficiently. It provides an interactive command-line interface to create and launch virtual machines based on predefined JSON configurations.
 
 
-Features:
-1. Create multiple virtual machines with a single command
-2. Assign machines resources based on configured parameters
-3. Automatically install necessary services on newly created machines
-4. Quickly start preconfigured machines based on the machine IDs
+Features
+--------
 
-Start machines based on saved configurations
+*   Create multiple virtual machines with a single command.
+    
+*   Assign machine resources based on configured parameters.
+    
+*   Automatically install necessary services on newly created machines.
+    
+*   Quickly start preconfigured machines based on machine IDs.
+    
+
 Installation
+------------
 
-Ensure that the following dependencies are installed on your system:
-- Python 3.12 and above
-- Required Python modules: jsonschema
-- Configure new machine parameters inside "Configs/config.json"
+Ensure the following dependencies are installed on your system:
 
-CONFIGURATION:
-The tool relies on two configuration files located in the configs/ directory:
-config.json: Defines default values and constraints for machine the parameters.
-instances.json: Stores information about created machines.
+*   Python 3.12 or later
+    
+*   Required Python module: jsonschema
 
-Both files must be correctly formatted for the tool to function properly. JSON schema validation ensures correctness.
+*   For using with a virtual enviroment make sure to install requirments.txt
+        
+
+Configurations
+-------------
+
+Configuration files are stored inside configs/ directory:
+
+*   **config.json**: Defines default values and constraints for creating new machines.
+    
+*   **instances.json**: Stores information about created machines.
+
 
 Usage
+-----
 
-Run the script using:
+### Commands
 
-python main.py
+Upon execution, BulkBuilder prompts the user to choose an action:
+    
+*   \--create or --createmachines: Create new virtual machines. (The actual required function for the project)
 
-Commands
+*   \--start or --startmachines: Start existing virtual machines. (Not required but its cool and will satisfy the Chokomoko gods)
+    
+*   \--help: Display the README file. (Recommended to open instead)
+    
+*   \--quit: Exit the program. (#SadFace)
+    
 
-Upon execution, BulkBuilder will prompt the user to choose an action:
+### Creating Machines
 
---start or --startmachines: Start existing virtual machines.
+First prompted to enter the desired machine IDs:
 
---create or --createmachines: Create new virtual machines.
+*   **Machine IDs** (Multiple IDs can be specified at once, separated by "Space")
 
---help: Display the README file.
+Than prompted to enter the desired machines parameters: (parameters will affect all mentioned IDs)
+    
+*   **Operating System** (Supported oparetion systems are configured inside config.json)
+    
+*   **Disk size** (Values are in MB, limitations and default values are configured inside config.json)
+    
+*   **RAM size** (Values are in MB, limitations and default values are configured inside config.json)
+    
+*   **Number of CPU cores** (limitations and default values are configured inside config.json)
+    
 
---quit: Exit the program.
+Once the parameters are validated, machines parameters are stored inside instances.json for later use.
 
-Creating Machines
 
-Users are prompted to enter:
+### Starting Machines
 
-Machine IDs (multiple IDs can be specified at once)
-
-Operating System (must be one of the supported OS options in config.json)
-
-Disk size (validated against configuration constraints)
-
-RAM size (validated against configuration constraints)
-
-Number of CPU cores (validated against configuration constraints)
-
-Once the parameters are validated, machines are added to instances.json, and provisioning scripts (if available) are executed.
-
-Starting Machines
-
-Users can start specific machines by entering their IDs or use -a or --all to start all available machines.
-
-Logging
-
-BulkBuilder logs operations to Logs/provisioning.log, capturing:
-
-Configuration validation
-
-Machine creation success/failure
-
-Machine startup attempts
-
-Errors encountered
-
-Error Handling
-
-If any JSON file is missing or improperly formatted, the tool will:
-
-Log the issue
-
-Display an error message
-
-Terminate execution with an appropriate exit code
+Users can start machines stored inside instances.json by entering their IDs or use --all to start all available machines.
+    
 
 Future Enhancements
+-------------------
 
-Implement machine updates
+*   Implement machine updates.
+    
+*   GUI-based configuration editor.
 
-Add support for additional machine configurations
+*   Actual Machines that work and stuff like that.
 
-Improve error handling and user feedback
+Loging
+-------------------
+Unlike configurations, a log file will be created automaticly
+For convinience, the log file seperates the logs by their level and time of creation
 
 License
+-------
 
-This project is open-source and free to use under the MIT License.
+BulkBuilder is NOT open-sourced and the software rights are preserved for Chokomoko.ltd.
 
-Author
-
-BulkBuilder was developed to simplify virtual machine provisioning and management. Contributions and improvements are welcome!
+Developed with love by Nof Tsadok Strauss
 

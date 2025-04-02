@@ -1,6 +1,6 @@
 
 __pycache__/
-src/Scratch.py 
+src/Scratch.py #Scratch file for quick testing
 *.log
 
 # Ignore virtual environments (Yehoraz i did this on purpose, asuming its common to share venv by requirments and NOT the actual files)

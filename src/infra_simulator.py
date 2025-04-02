@@ -29,11 +29,12 @@ def CheckLog():
 def ReadMe():
     try:
         with open(README_PATH, "r") as file:
+            print("\n\n\n")
             print(file.read())
         logging.debug("The ReadMe file was reqested", exc_info=True)
         input("Press Enter to continue...")
     except(FileNotFoundError):
-        logging.warning(f"The file: {README_PATH} doesn't exist", exc_info=True)
+        logging.error(f"The file: {README_PATH} doesn't exist", exc_info=True)
         print(f"The file: {README_PATH} doesn't exist")
         exit(2)
 
@@ -103,8 +104,8 @@ def validate_jsons(path):
         jsonschema.validate(instance=Json, schema=schema)
         logging.debug(f"Json Validator: {path} is valid.")
     except jsonschema.exceptions.ValidationError as err:
-        logging.critical(f"The file {path} isn't in a vlaid json format:\n", exc_info=True)
-        print(f"The file {path} isn't in a vlaid json format:\n", err)
+        logging.critical(f"The file {path} isn't in a valid json format:\n", exc_info=True)
+        print(f"The file {path} isn't in a valid json format:\n", err)
         exit(3)
 
 #Used for validating numaric machine params.
@@ -115,7 +116,7 @@ def validate_numeric_input(param, min_val, max_val, defaultVal):
         #If the user didn't input anything, the default value will be used
         if not value: 
             value = int(defaultVal)
-            print(f"Default value: {value} was choosen")
+            print(f"Default value: {value} was chosen")
             break
 
         #Checks if the value is a quit or help
@@ -138,7 +139,7 @@ def validate_numeric_input(param, min_val, max_val, defaultVal):
             continue
         else:
             break
-    print(f"Value: {value} was choosen")
+    print(f"Value: {value} was chosen")
     return value
     
 def GetParams():
@@ -177,7 +178,7 @@ def GetParams():
 
         #Setting params for the machines:
         print("\nNotice:\nThe BulkBuilder \"--createMachine\" command creates multiple machines with the same configuration.\n"
-            "assigend parameters will be used for all mentioned machines:\n\n")
+            "assigned parameters will be used for all mentioned machines:\n\n")
         #Get And Validate Vhe OS
         while True:
             Os = input("What operating system do you want to asign for the machines?\n")
@@ -219,7 +220,7 @@ def CreateMachine():
             JsonWrite(machine_conf, MACHINES_CONF)
         except Exception as err:
             logging.error(f"Failed to save machine configuration: {id} ", exc_info=True)
-            print(f"Failed to write the machine: {id} to the config file")
+            print(f"Failed to write the machine: {id} to the configuration")
             FailedMachines.append(id)
         #Installs services on the new machines
         try:
@@ -260,15 +261,15 @@ def StartMachine():
                 ActiveMachines[machine["ID"]] = Machine(machine["ID"], machine["OS"], machine["Disk"], machine["Ram"], machine["Cores"])
                 print(f"Started machine: {machine['ID']}")
             except KeyError:
-                logging.error(f"The machine: {id} doesn't exist", exc_info=True)
+                logging.warning(f"The machine: {id} doesn't exist", exc_info=True)
                 print(f"The machine: {id} doesn't exist")
     if len(ActiveMachines) == len(requests):
-        print(f"Succesfuly activated the requsted machines\n")
+        print(f"Successfully activated the requsted machines\n")
         logging.info(f"Activated requsted machines: {ActiveMachines.keys()}")
     else:
-        print(f"The following machines were succesfuly activated: {', '.join(ActiveMachines.keys())}\n")
+        print(f"The following machines were Successfully activated: {', '.join(ActiveMachines.keys())}\n")
 def Welcome():
-    print("Hello!\nWelcome to BulkBuilder\n"
+    print("\nHello!\nWelcome to BulkBuilder\n"
           "BultBuilder is a simple tool that lets you create and run multiple virtual machines at once..\n"
           "At any time for help use --help\n"
           )
@@ -298,11 +299,11 @@ def Welcome():
     
 def Main():
     validate_jsons(CONFIG_PATH)
-    logging.info("Config file was validated on Main run")
-    print("Software config file was validated")
+    logging.info("configuration was validated on Main run")
+    print("Software configuration was validated")
     validate_jsons(MACHINES_CONF)
     logging.info("Machines file was validated on Main run")
-    print("Machines config file was validated")
+    print("Machines configuration was validated")
     Welcome()
 
 Main()
