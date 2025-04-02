@@ -1,12 +1,31 @@
+import os
+LOG_PATH = "Logs/provisioning.log"
+
+def validate_log(): #Creates a log validator to ensure the log file exists, if it doesn't it will create it
+    try:
+        directory = os.path.dirname(LOG_PATH)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+            print(f"Created the log folder: {directory}")
+
+        if not os.path.exists(LOG_PATH):
+            with open(LOG_PATH, "w") as file:
+                file.write("Log file was created")
+            print(f"Created the log file: {LOG_PATH}")
+
+    except OSError:
+        print(f"Failed to create the log folder: {os.path.dirname(LOG_PATH)}")
+        exit(2)
+
+validate_log() #Calls the function to validate the log file
+
 import json
 from machine import Machine
 import subprocess
 import logging
-import os
 import jsonschema # Full library is required for working with its exceptions 
 CONFIG_PATH = "configs/config.json"
 MACHINES_CONF = "configs/instances.json"
-LOG_PATH = "Logs/provisioning.log"
 README_PATH = "README.MD"
 QUITVALS = ["--quit" "--Quit", "--QUIT", "-q", "-Q", "--q", "--Q"] #using one of those will quite the progrem
 HELPVALS = ["--help", "--Help", "--HELP", "-h", "-H", "--h", "--H"] #using one of those will display the README.MD
