@@ -93,7 +93,7 @@ Future Enhancements
 
 Loging
 -------------------
-Unlike configurations, a log file will be created automaticly
+Currently the log file is required for the software to run!
 For convinience, the log file seperates the logs by their level and time of creation
 
 License

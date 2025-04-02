@@ -2,6 +2,7 @@ import json
 from machine import Machine
 import subprocess
 import logging
+import os
 import jsonschema # Full library is required for working with its exceptions 
 CONFIG_PATH = "configs/config.json"
 MACHINES_CONF = "configs/instances.json"
@@ -15,15 +16,6 @@ logging.basicConfig(
     filename=LOG_PATH,
     filemode='a',
     format='%(levelname)s - %(asctime)s - %(message)s')
-
-#Checks if a log file exists, if not it will create one
-def CheckLog():
-    try:
-        with open(LOG_PATH, "r") as file:
-            pass
-    except FileNotFoundError:
-        with open(LOG_PATH, "w") as file:
-            pass
 
 # Opens the read me file and print it,Notice it is in markdown format, but still readable in the console, i actually think it looks better this way
 def ReadMe():
@@ -270,7 +262,7 @@ def StartMachine():
         print(f"The following machines were Successfully activated: {', '.join(ActiveMachines.keys())}\n")
 def Welcome():
     print("\nHello!\nWelcome to BulkBuilder\n"
-          "BultBuilder is a simple tool that lets you create and run multiple virtual machines at once..\n"
+          "BultBuilder is a simple tool that lets you create and run multiple virtual machines at once.\n"
           "At any time for help use --help\n"
           )
     while True:
