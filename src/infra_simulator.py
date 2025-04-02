@@ -11,8 +11,8 @@ QUITVALS = ["--quit" "--Quit", "--QUIT", "-q", "-Q", "--q", "--Q"] #using one of
 HELPVALS = ["--help", "--Help", "--HELP", "-h", "-H", "--h", "--H"] #using one of those will display the README.MD
 
 logging.basicConfig(
-    level=logging.ERROR,
-    filename='LOG_PATH',
+    level=logging.DEBUG,
+    filename=LOG_PATH,
     filemode='a',
     format='%(levelname)s - %(asctime)s - %(message)s')
 
@@ -33,7 +33,7 @@ def ReadMe():
         logging.debug("The ReadMe file was reqested", exc_info=True)
         input("Press Enter to continue...")
     except(FileNotFoundError):
-        logging.error(f"The file: {README_PATH} doesn't exist", exc_info=True)
+        logging.warning(f"The file: {README_PATH} doesn't exist", exc_info=True)
         print(f"The file: {README_PATH} doesn't exist")
         exit(2)
 
@@ -53,7 +53,7 @@ def JsonWrite(machine, file_path):
     conf[machine["ID"]] = machine     #Sets a key named by the given machine ID, with the machine dict itslef as its value
     with open(file_path, "w") as file:
         json.dump(conf, file)
-    logging.info(f"Config was updated with the machine: {machine['ID']}")
+    logging.debug(f"Config was updated, inserted machine: {machine['ID']}")
 
 #Validates the jsons based on the schema
 def validate_jsons(path):
@@ -101,16 +101,12 @@ def validate_jsons(path):
     Json = JsonLoad(path)
     try:
         jsonschema.validate(instance=Json, schema=schema)
-        logging.info(f"{path} is valid.")
-        print(f"{path} is valid.")
+        logging.debug(f"Json Validator: {path} is valid.")
     except jsonschema.exceptions.ValidationError as err:
         logging.critical(f"The file {path} isn't in a vlaid json format:\n", exc_info=True)
         print(f"The file {path} isn't in a vlaid json format:\n", err)
         exit(3)
 
-
-
-        
 #Used for validating numaric machine params.
 def validate_numeric_input(param, min_val, max_val, defaultVal):
     while True:
@@ -290,62 +286,23 @@ def Welcome():
         elif Action in HELPVALS:
             ReadMe()
         elif Action == "-s" or Action == "--startmachines" or Action == "--start":
-            logging.info("Start machines was selected")
+            logging.debug("Start machines was selected in main loop")
             StartMachine()   #Runs saved machines as based on their ID
         elif Action == "-c" or Action == "--createmachine" or Action == "--create":
-            logging.debug("Create machines was selected")
+            logging.debug("Create machines was selected in main loop")
             CreateMachine()  #Creates new machines 
         else: 
             print("Invalid action, please try again")
             continue
     
+    
 def Main():
     validate_jsons(CONFIG_PATH)
-    logging.debug("Config file was validated on Main run")
+    logging.info("Config file was validated on Main run")
+    print("Software config file was validated")
     validate_jsons(MACHINES_CONF)
-    logging.debug("Machines file was validated on Main run")
+    logging.info("Machines file was validated on Main run")
+    print("Machines config file was validated")
     Welcome()
 
 Main()
-
-# for AI to know my Machine class:
-# import logging
-# logging.basicConfig(
-#     level=logging.INFO,
-#     filename='Logs/provisioning.log',
-#     filemode='a',
-#     format='%(levelname)s - %(asctime)s - %(message)s')
-
-
-# class Machine:
-#     def __init__(self, ID, OS, Disk, Ram, Cores):
-#         self.ID = ID
-#         self.OS = OS
-#         self.Disk = Disk
-#         self.Ram = Ram
-#         self.Cores = Cores
-#         self.logger = logging.basicConfig(
-#             level=logging.INFO,
-#             filename='Logs/provisioning.log',
-#             filemode='a',
-#             format='%(levelname)s - %(asctime)s - %(message)s')
-#         logging.info(f"Created a new machine: {self.ID}") #Didnt implement self.logger because there is only a single class.
-
-#     def InstanceToDict(self):
-#         return {
-#             "ID" : self.ID,
-#             "OS": self.OS,
-#             "Disk": self.Disk,
-#             "Ram" : self.Ram,
-#             "Cores": self.Cores}
-
-# def MachineUpdate(ids=None): #Depricated - Didn't have time to finish, isn't a project goal
-#     Allmachines = JsonLoad(MACHINES_CONF)
-#     if ids == None:
-#         ids = input("What Machine id's do you want to update?").split()
-#     Key = input("What Key would you like to update?")
-#     Value = input("What is the new value? ")
-#     for id in ids:
-#         machine = Allmachines[id]
-#         machine[Key] = Value
-#         JsonWrite[machine, MACHINES_CONF]
