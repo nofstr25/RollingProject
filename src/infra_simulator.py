@@ -25,7 +25,7 @@ def CheckLog():
         with open(LOG_PATH, "w") as file:
             pass
 
-# Opens the read me file and print it
+# Opens the read me file and print it,Notice it is in markdown format, but still readable in the console, i actually think it looks better this way
 def ReadMe():
     try:
         with open(README_PATH, "r") as file:
