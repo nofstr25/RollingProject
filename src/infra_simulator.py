@@ -1,8 +1,21 @@
 import os
-LOG_PATH = "Logs/provisioning.log"
+import json
+from machine import Machine
+import subprocess
+import logging
+import jsonschema # Full library is required for working with its exceptions 
 
-def validate_log(): #Creates a log validator to ensure the log file exists, if it doesn't it will create it
-    try:
+LOG_PATH = "Logs/provisioning.log"
+CONFIG_PATH = "configs/config.json"
+MACHINES_CONF = "configs/instances.json"
+README_PATH = "README.MD"
+QUITVALS = ["--quit" "--Quit", "--QUIT", "-q", "-Q", "--q", "--Q"] #using one of those will quite the progrem
+HELPVALS = ["--help", "--Help", "--HELP", "-h", "-H", "--h", "--H"] #using one of those will display the README.MD
+
+#Handles the logging setup: Ensure file exsistence, configure logging parameters
+def LOG_Handler():
+    #Validates the log file exist, if not it creates it.
+    try:   
         directory = os.path.dirname(LOG_PATH)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -10,31 +23,18 @@ def validate_log(): #Creates a log validator to ensure the log file exists, if i
 
         if not os.path.exists(LOG_PATH):
             with open(LOG_PATH, "w") as file:
-                file.write("Log file was created")
+                file.write("")
             print(f"Created the log file: {LOG_PATH}")
 
     except OSError:
         print(f"Failed to create the log folder: {os.path.dirname(LOG_PATH)}")
         exit(2)
 
-validate_log() #Calls the function to validate the log file
-
-import json
-from machine import Machine
-import subprocess
-import logging
-import jsonschema # Full library is required for working with its exceptions 
-CONFIG_PATH = "configs/config.json"
-MACHINES_CONF = "configs/instances.json"
-README_PATH = "README.MD"
-QUITVALS = ["--quit" "--Quit", "--QUIT", "-q", "-Q", "--q", "--Q"] #using one of those will quite the progrem
-HELPVALS = ["--help", "--Help", "--HELP", "-h", "-H", "--h", "--H"] #using one of those will display the README.MD
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    filename=LOG_PATH,
-    filemode='a',
-    format='%(levelname)s - %(asctime)s - %(message)s')
+    logging.basicConfig( #Configure the logging module settings
+        level=logging.DEBUG,
+        filename=LOG_PATH,
+        filemode='a',
+        format='%(levelname)s - %(asctime)s - %(message)s')
 
 # Opens the read me file and print it,Notice it is in markdown format, but still readable in the console, i actually think it looks better this way
 def ReadMe():
@@ -309,6 +309,7 @@ def Welcome():
     
     
 def Main():
+    LOG_Handler()
     validate_jsons(CONFIG_PATH)
     logging.info("configuration was validated on Main run")
     print("Software configuration was validated")
